@@ -25,7 +25,7 @@ class CustomCNN(nn.Module):
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(128 * 28 * 28, 512) # 224/2 /2 /2 = 28
-        self.fc2 = nn.Linear(512, 10)
+        self.fc2 = nn.Linear(512, 10) #nb de classes codé en dur pour le moment
  
     def forward(self, x):
         x = F.relu(self.conv1(x))

@@ -145,4 +145,4 @@ if __name__=='__main__':
 	# save your model
 	os.makedirs('./weights', exist_ok=True)
  
-	torch.save(net.state_dict(), './weights/{exp_name}.pth')
+	torch.save(net.state_dict(), f'./weights/{exp_name}.pth')
