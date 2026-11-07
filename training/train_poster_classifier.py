@@ -10,8 +10,9 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 import os
+import torchvision.transforms.functional as Ft
 
-from model import CustomCNN
+from models.classification import CustomCNN
 
 class ResizeAndPadTransform: #Pour le transform qd on load le dataset
 
@@ -89,21 +90,21 @@ def test(model, dataloader):
 
 
 if __name__=='__main__':
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--exp_name', type=str, default = 'Poster_cls', help='experiment name')
-	parser.add_argument('--batch_size', type=int, default = int(64), help='batch_size')
-	parser.add_argument('--lr', type=float, default = float(1e-3), help='learning rate')
-	parser.add_argument('--nb_epochs', type=int, default = int(10), help='number of epochs')
-	parser.add_argument('--target_size', type=int, default = int(224), help='image size required by the model')
-	parser.add_argument('--padding', type=str, default = "constant", help='type of padding (constant,edge,reflect,symmetric)')
-	parser.add_argument('--fill', type=int, default = int(0), help='couleur du padding si "constant", 0=noir')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--exp_name', type=str, default = 'Poster_cls', help='experiment name')
+    parser.add_argument('--batch_size', type=int, default = int(64), help='batch_size')
+    parser.add_argument('--lr', type=float, default = float(1e-3), help='learning rate')
+    parser.add_argument('--nb_epochs', type=int, default = int(10), help='number of epochs')
+    parser.add_argument('--target_size', type=int, default = int(224), help='image size required by the model')
+    parser.add_argument('--padding', type=str, default = "constant", help='type of padding (constant,edge,reflect,symmetric)')
+    parser.add_argument('--fill', type=int, default = int(0), help='couleur du padding si "constant", 0=noir')
  
  
-	args = parser.parse_args()
-	exp_name = args.exp_name
-	batch_size = args.batch_size
-	nb_epochs = args.nb_epochs
-	lr = args.lr
+    args = parser.parse_args()
+    exp_name = args.exp_name
+    batch_size = args.batch_size
+    nb_epochs = args.nb_epochs
+    lr = args.lr
     target_size = args.target_size
     padding = args.padding
     fill = args.fill
@@ -111,14 +112,14 @@ if __name__=='__main__':
     # setting device on GPU if available, else CPU
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
  
-	# transforms
+    # transforms
     transform = transforms.Compose([
         ResizeAndPadTransform(target_size=target_size, padding=padding, fill=fill),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Normalisation ImageNet
     ])
  
-	# datasets
+    # datasets
     dataset_path = '../content/sorted_movie_posters_paligema'   #! Faut se mettre d'accord sur un path précis et plus le changer
     full_dataset = torchvision.datasets.ImageFolder(root=dataset_path, transform=transform)
 
@@ -131,18 +132,18 @@ if __name__=='__main__':
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
  
-	net = CustomCNN().to(device)
-	# default `log_dir` is "runs" - we'll be more specific here
-	writer = SummaryWriter(f'runs/{exp_name}')
-	
-	optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9)
+    net = CustomCNN().to(device)
+    # default `log_dir` is "runs" - we'll be more specific here
+    writer = SummaryWriter(f'runs/{exp_name}')
+    
+    optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9)
  
-	train(net, optimizer, trainloader, nb_epochs, writer)
-	test_acc = test(net, testloader)
+    train(net, optimizer, trainloader, nb_epochs, writer)
+    test_acc = test(net, testloader)
  
-	print(f'test accuracy: {test_acc}')
+    print(f'test accuracy: {test_acc}')
  
-	# save your model
-	os.makedirs('./weights', exist_ok=True)
+    # save your model
+    os.makedirs('./weights', exist_ok=True)
  
-	torch.save(net.state_dict(), f'./weights/{exp_name}.pth')
+    torch.save(net.state_dict(), f'./weights/{exp_name}.pth')
